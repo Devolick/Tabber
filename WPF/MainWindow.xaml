@@ -1,0 +1,23 @@
+﻿<Window x:Class="WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WPF"
+        xmlns:tabber="clr-namespace:Tabber;assembly=Tabber"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <tabber:TabberControl>
+            <tabber:TabberItem Header='TabberItem1'>
+                Test Tabber Content 1
+            </tabber:TabberItem>
+            <tabber:TabberItem Header='TabberItem2'>
+                Test Tabber Content 2
+            </tabber:TabberItem>
+            <tabber:TabberItem Header='TabberItem3'>
+                Test Tabber Content 3
+            </tabber:TabberItem>
+        </tabber:TabberControl>
+    </Grid>
+</Window>
