@@ -15,30 +15,55 @@ using System.Windows.Media;
 
 namespace Tabber
 {
-    public class TabberControl : TabControl
+    public class TabberControl : System.Windows.Controls.TabControl
     {
-        private Window window;
+        internal static ZOrderList ZOrders { get; private set; }
+
+        private Window currentWindow;
         private ShadowTabberItem shadowItem;
         private TabPanel tabPanel;
+        private TabItem lastSelectedItem;
+        private bool mainTabberIsEmpty;
 
+
+        public bool Pinned { get; set; }
+
+        static TabberControl()
+        {
+            ZOrders = new ZOrderList();
+        }
         public TabberControl()
             :base()
         {
-            window = Window.GetWindow(this);
+            mainTabberIsEmpty = false;
+            lastSelectedItem = null;
             shadowItem = null;
-            SizeChanged += TabberControl_SizeChanged;
 
             Loaded += TabberControl_Loaded;
+            Unloaded += TabberControl_Unloaded;
+            ContentWindow.Enter += ContentWindow_Enter;
+            ContentWindow.Move += ContentWindow_Move;
+            ContentWindow.Over += ContentWindow_Over;
+
         }
 
+        private void TabberControl_Unloaded(object sender, RoutedEventArgs e)
+        {
+            ContentWindow.Enter -= ContentWindow_Enter;
+            ContentWindow.Move -= ContentWindow_Move;
+            ContentWindow.Over -= ContentWindow_Over;
+            ZOrders.Remove(currentWindow);
+        }
         private void TabberControl_Loaded(object sender, RoutedEventArgs e)
         {
+            currentWindow = Window.GetWindow(this);
+            currentWindow.Activated += ContentWindow_Activated;
             tabPanel = FindItemsPanel(this);
+            ZOrders.AddCheckedFirst(currentWindow);
         }
-
-        private void TabberControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void ContentWindow_Activated(object sender, EventArgs e)
         {
-            
+            ZOrders.TopReorder(currentWindow);
         }
 
         private TabPanel FindItemsPanel(DependencyObject startNode)
@@ -48,7 +73,7 @@ namespace Tabber
             for (int i = 0; i < count; i++)
             {
                 current = VisualTreeHelper.GetChild(startNode, i);
-                if ((current.GetType()).Equals(typeof(TabPanel)))
+                if ((current as TabPanel) != null)
                 {
                     return (TabPanel)current;
                 }
@@ -61,36 +86,100 @@ namespace Tabber
             return null;
         }
 
-        internal void Enter(ContentWindow window)
+        private void ContentWindow_Enter(ContentWindow window)
         {
+            if (window.Equals(this)) return;
+
+            mainTabberIsEmpty = (currentWindow as ContentWindow) == null && Items.Count < 1;
+            if (!mainTabberIsEmpty)
+            {
+                foreach (TabItem item in Items)
+                {
+                    if (item.IsSelected)
+                    {
+                        lastSelectedItem = item;
+                        break;
+                    }
+                }
+            }
             shadowItem = null;
         }
-        internal void Move(ContentWindow window)
+        private void ContentWindow_Move(ContentWindow window)
         {
-            if (ContainsItemsPanel(window.GetDragPosition()))
+            if (window.Equals(this)) return;
+
+            if (mainTabberIsEmpty)
             {
-                FakeTab(window);
+                if (EmptyItemsPanelRect(window.GetDragItem())
+                        .Contains(window.GetDragPosition()))
+                {
+                    FocusOrderWindow(window);
+                    if (shadowItem == null)
+                    {
+                        shadowItem = new ShadowTabberItem();
+                        shadowItem.Header = new string(' ', 24);
+                        Items.Add(shadowItem);
+                        shadowItem.IsSelected = true;
+                    }
+                }
+                else
+                {
+                    if (shadowItem != null)
+                    {
+                        Items.Remove(shadowItem);
+                        shadowItem = null;
+                    }
+                }
+            }
+            else
+            {
+                if (ItemsPanelRect()
+                        .Contains(window.GetDragPosition()))
+                {
+                    FocusOrderWindow(window);
+                    FakeTab(window);
+                }
+                else
+                {
+                    if (shadowItem != null)
+                    {
+                        Items.Remove(shadowItem);
+                        shadowItem = null;
+                        lastSelectedItem.IsSelected = true;
+                    }
+                }
+            }
+        }
+        private void ContentWindow_Over(ContentWindow window)
+        {
+            if (window.Equals(this)) return;
+
+            if (mainTabberIsEmpty)
+            {
+                if (shadowItem != null)
+                {
+                    ZOrders.OrderFound();
+                    int dropItemIndex = Items.IndexOf(shadowItem);
+                    Items.Remove(shadowItem);
+                    TabberItem replacedItem = window.ReplaceItem();
+                    Items.Add(replacedItem);
+                    replacedItem.IsSelected = true;
+                }
             }
             else
             {
                 if (shadowItem != null)
                 {
+                    ZOrders.OrderFound();
+                    int dropItemIndex = Items.IndexOf(shadowItem);
                     Items.Remove(shadowItem);
-                    shadowItem = null;
+                    TabberItem replacedItem = window.ReplaceItem();
+                    Items.Insert(dropItemIndex, replacedItem);
+                    replacedItem.IsSelected = true;
                 }
             }
         }
-        internal void Over(ContentWindow window)
-        {
-            if (shadowItem != null)
-            {
-                int dropItemIndex = Items.IndexOf(shadowItem);
-                Items.Remove(shadowItem);
-                TabberItem replacedItem = window.ReplaceItem();
-                Items.Insert(dropItemIndex, replacedItem);
-                replacedItem.IsSelected = true;
-            }
-        }
+
         private void FakeTab(ContentWindow window)
         {
             TabItem replaceItem = null;
@@ -106,16 +195,24 @@ namespace Tabber
             if (replaceItem != null)
             {
                 if ((replaceItem as TabberItem) != null) {
+                    int shadowIndex = shadowItem != null ? Items.IndexOf(shadowItem) : -1;
                     if (shadowItem == null)
                     {
                         shadowItem = new ShadowTabberItem();
                         shadowItem.Header = new string(' ', 24);
                     }
+                    int replaceItemIndex = Items.IndexOf(replaceItem);
+
+                    if (shadowIndex > -1 && shadowIndex < replaceItemIndex)
+                    {
+                        Items.Remove(replaceItem);
+                        Items.Insert(shadowIndex, replaceItem);
+                    }
                     else
                     {
                         Items.Remove(shadowItem);
+                        Items.Insert(replaceItemIndex, shadowItem);
                     }
-                    Items.Insert(Items.IndexOf(replaceItem), shadowItem);
                 }
             }
             else if((Items[Items.Count - 1] as ShadowTabberItem) == null)
@@ -132,31 +229,45 @@ namespace Tabber
                     Items.Add(shadowItem);
                 }
             }
-        }
-        private bool ContainsItemsPanel(Point dragPoint)
-        {
-            Rect itemPanelRect = ItemsPanelRect();
-            //TESTWindow.HighlightPosition(this, "ItemsPanel", itemPanelRect);
-            return itemPanelRect.Contains(dragPoint);
+
+            shadowItem.IsSelected = true;
         }
         private Rect TabItemRect(TabItem tab)
         {
-            Point tabPosition = Mouse.GetPosition(tab);
+            Point locationFromScreen = tab.PointToScreen(new Point(0, 0));
             Rect tabRect = new Rect(
-                new Point(tabPosition.X, tabPosition.Y),
+                new Point(locationFromScreen.X, locationFromScreen.Y),
                 new Size(tab.ActualWidth, tab.ActualHeight));
 
             return tabRect;
         }
         private Rect ItemsPanelRect()
         {
-            Point tabberPosition = Mouse.GetPosition(tabPanel);
+            Point locationFromScreen = tabPanel.PointToScreen(new Point(0, 0));
             return new Rect(
-                tabberPosition.X - tabPanel.ActualWidth,
-                tabberPosition.Y - tabPanel.ActualHeight,
+                locationFromScreen.X,
+                locationFromScreen.Y,
                 tabPanel.ActualWidth,
                 tabPanel.ActualHeight);
         }
-
+        private Rect EmptyItemsPanelRect(TabItem tab)
+        {
+            Point locationFromScreen = tabPanel.PointToScreen(new Point(0, 0));
+            return new Rect(
+                locationFromScreen.X,
+                locationFromScreen.Y,
+                tabPanel.ActualWidth,
+                tab.ActualHeight);
+        }
+        private void FocusOrderWindow(ContentWindow window)
+        {
+            ZOrders.OrderFound();
+            Debug.WriteLine("FocusOrderWindow:"+ currentWindow.GetHashCode());
+            if (!ZOrders.IsBackOfFront(window, currentWindow))
+            {
+                currentWindow.Focus();
+                window.Focus();
+            }
+        }
     }
 }

@@ -44,7 +44,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ContentWindow.cs" />
-    <Compile Include="ReflectionHelper.cs" />
     <Compile Include="TabberControl.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShadowTabberItem.cs" />
@@ -52,6 +51,7 @@
     <Compile Include="Win32\POINT.cs" />
     <Compile Include="Win32\Win32Helper.cs" />
     <Compile Include="Win32\WindowCmd.cs" />
+    <Compile Include="ZOrderList.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

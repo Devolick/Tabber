@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <tabber:TabberControl>
+        <tabber:TabberControl Pinned="False">
             <tabber:TabberItem Header='TabberItem1'>
                 Test Tabber Content 1
             </tabber:TabberItem>

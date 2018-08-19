@@ -9,7 +9,7 @@ using System.Windows.Input;
 
 namespace Tabber
 {
-    public class TabberItem: TabItem
+    public class TabberItem: System.Windows.Controls.TabItem
     {
         private Point deltaPosition;    
         private ContentWindow window;
@@ -28,13 +28,28 @@ namespace Tabber
         {
             if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed && dragTabAndWindow)
             {
-                Point newPosition = e.GetPosition(this);
-                deltaPosition = new Point(newPosition.X - deltaPosition.X, newPosition.Y - deltaPosition.Y);
-                if (Math.Abs(deltaPosition.X) > 4 || Math.Abs(deltaPosition.Y) > 4)
+                Window currentWindow = Window.GetWindow(this);
+                TabberControl tabberControl = (TabberControl)Parent;
+                if (!((currentWindow as ContentWindow) == null && 
+                    tabberControl.Items.Count < 2 && 
+                    tabberControl.Pinned))
                 {
-                    window = new ContentWindow(this);
-                    dragTabAndWindow = false;
-                    window.DragMove();
+                    Point newPosition = e.GetPosition(this);
+                    deltaPosition = new Point(newPosition.X - deltaPosition.X, newPosition.Y - deltaPosition.Y);
+                    if (Math.Abs(deltaPosition.X) > 4 || Math.Abs(deltaPosition.Y) > 4)
+                    {
+                        Point dragPosition = this.PointToScreen(new Point(0, 0));
+                        window = new ContentWindow(
+                            this,
+                            new Rect(
+                                dragPosition.X,
+                                dragPosition.Y,
+                                currentWindow.ActualWidth,
+                                currentWindow.ActualHeight),
+                            true);
+                        dragTabAndWindow = false;
+                        window.DragMove();
+                    }
                 }
             }
         }
