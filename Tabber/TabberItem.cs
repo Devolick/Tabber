@@ -104,6 +104,7 @@ namespace Tabber
                                     currentWindow.ActualWidth,
                                     currentWindow.ActualHeight),
                                 true);
+                            Debug.WriteLine(window.GetHashCode());
                             dragTabAndWindow = false;
                             inDragMove = true;
                             window.DragMove();

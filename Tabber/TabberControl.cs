@@ -37,6 +37,9 @@ namespace Tabber
             get { return (bool)GetValue(PinnedProperty); }
             set { SetValue(PinnedProperty, value); }
         }
+        /// <summary>
+        /// Will hold the last tab from dragging.
+        /// </summary>
         public static readonly DependencyProperty PinnedProperty =
             DependencyProperty.Register("Pinned", typeof(bool), typeof(TabberControl), new PropertyMetadata(false));
 
@@ -108,7 +111,8 @@ namespace Tabber
 
         internal void Enter(ContentWindow window)
         {
-            if (window.Equals(this)) return;
+            if (object.ReferenceEquals(window, currentWindow)) return;
+
             mainTabberIsEmpty = (currentWindow as ContentWindow) == null && Items.Count < 1;
             if (!mainTabberIsEmpty)
             {
@@ -125,7 +129,7 @@ namespace Tabber
         }
         internal void Move(ContentWindow window)
         {
-            if (window.Equals(this)) return;
+            if (object.ReferenceEquals(window, currentWindow)) return;
 
             if (mainTabberIsEmpty)
             {
@@ -155,8 +159,9 @@ namespace Tabber
                 if (ItemsPanelRect()
                         .Contains(window.GetDragPosition()))
                 {
+                    Debug.WriteLine(window.GetHashCode());
                     FocusOrderWindow(window);
-                    FakeTab(window);
+                    FakeTab(window.GetDragPosition());
                 }
                 else
                 {
@@ -166,12 +171,13 @@ namespace Tabber
                         shadowItem = null;
                         lastSelectedItem.IsSelected = true;
                     }
+                    oldReplaceItem = null;
                 }
             }
         }
         internal void Over(ContentWindow window)
         {
-            if (window.Equals(this)) return;
+            if (object.ReferenceEquals(window, currentWindow)) return;
 
             if (mainTabberIsEmpty)
             {
@@ -200,14 +206,15 @@ namespace Tabber
                 }
             }
         }
-        private void FakeTab(ContentWindow window)
+
+        private TabItem oldReplaceItem;
+        private void FakeTab(Point drahPosition)
         {
             TabItem replaceItem = null;
             foreach (TabItem tab in Items)
             {
                 Rect tabRect = TabItemRect(tab);
-                TabberItem tabItem = tab as TabberItem;
-                if (tabRect.Contains(window.GetDragPosition()) && (tabItem != null && !tabItem.Pin))
+                if (tabRect.Contains(drahPosition))
                 {
                     replaceItem = tab;
                     break;
@@ -215,7 +222,10 @@ namespace Tabber
             }
             if (replaceItem != null)
             {
-                if ((replaceItem as TabberItem) != null) {
+                Debug.WriteLine("1");
+                TabberItem tabberItem = replaceItem as TabberItem;
+                if (tabberItem != null && !tabberItem.Pin && (oldReplaceItem ==null || !oldReplaceItem.Equals(replaceItem))) {
+                    oldReplaceItem = replaceItem;
                     int shadowIndex = shadowItem != null ? Items.IndexOf(shadowItem) : -1;
                     if (shadowItem == null)
                     {
@@ -234,10 +244,12 @@ namespace Tabber
                         Items.Remove(shadowItem);
                         Items.Insert(replaceItemIndex, shadowItem);
                     }
+                    shadowItem.IsSelected = true;
                 }
             }
             else if((Items[Items.Count - 1] as ShadowTabberItem) == null)
             {
+                Debug.WriteLine("2");
                 if (shadowItem == null)
                 {
                     shadowItem = new ShadowTabberItem();
@@ -249,9 +261,9 @@ namespace Tabber
                     Items.Remove(shadowItem);
                     Items.Add(shadowItem);
                 }
+                oldReplaceItem = null;
+                shadowItem.IsSelected = true;
             }
-
-            shadowItem.IsSelected = true;
         }
         private Rect TabItemRect(TabItem tab)
         {

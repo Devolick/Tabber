@@ -136,8 +136,8 @@ namespace Tabber
         internal Point GetDragPosition()
         {
             TabberItem item = GetDragItem();
-            Point locationFromScreen = item.PointToScreen(new Point(0, 0));
-
+            Point locationFromScreen = item.PointToScreen(
+                new Point(item.ActualWidth / 2, item.ActualHeight / 2));
             return locationFromScreen;
         }
         internal TabberItem GetDragItem()
