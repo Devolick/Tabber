@@ -4,29 +4,41 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Markup;
-using Tabber.Win32;
 using System.Windows.Media;
 
 namespace Tabber
 {
+    /// <summary>
+    /// Drag tab control
+    /// </summary>
     public class TabberControl : System.Windows.Controls.TabControl
     {
-        internal static ZOrderList ZOrders { get; private set; }
-
         private Window currentWindow;
         private ShadowTabberItem shadowItem;
         private TabPanel tabPanel;
         private TabItem lastSelectedItem;
         private bool mainTabberIsEmpty;
+        private bool firstSort;
 
+        internal static ZOrderList ZOrders { get; private set; }
 
-        public bool Pinned { get; set; }
+        /// <summary>
+        /// Will hold the last tab from dragging.
+        /// </summary>
+        public bool Pinned
+        {
+            get { return (bool)GetValue(PinnedProperty); }
+            set { SetValue(PinnedProperty, value); }
+        }
+        public static readonly DependencyProperty PinnedProperty =
+            DependencyProperty.Register("Pinned", typeof(bool), typeof(TabberControl), new PropertyMetadata(false));
 
         static TabberControl()
         {
@@ -35,35 +47,43 @@ namespace Tabber
         public TabberControl()
             :base()
         {
+            firstSort = true;
             mainTabberIsEmpty = false;
             lastSelectedItem = null;
             shadowItem = null;
 
             Loaded += TabberControl_Loaded;
             Unloaded += TabberControl_Unloaded;
-            ContentWindow.Enter += ContentWindow_Enter;
-            ContentWindow.Move += ContentWindow_Move;
-            ContentWindow.Over += ContentWindow_Over;
-
         }
 
         private void TabberControl_Unloaded(object sender, RoutedEventArgs e)
         {
-            ContentWindow.Enter -= ContentWindow_Enter;
-            ContentWindow.Move -= ContentWindow_Move;
-            ContentWindow.Over -= ContentWindow_Over;
-            ZOrders.Remove(currentWindow);
+            ZOrders.Remove(this);
         }
         private void TabberControl_Loaded(object sender, RoutedEventArgs e)
         {
-            currentWindow = Window.GetWindow(this);
-            currentWindow.Activated += ContentWindow_Activated;
+            if (!DesignerProperties.GetIsInDesignMode(this)) {
+                currentWindow = Window.GetWindow(this);
+                currentWindow.Activated += ContentWindow_Activated;
+                currentWindow.Closing += CurrentWindow_Closing;
+            }
             tabPanel = FindItemsPanel(this);
-            ZOrders.AddCheckedFirst(currentWindow);
+            ZOrders.AddCheckedFirst(this);
+
+            firstSort = false;
+            SortPins();
+        }
+        private void CurrentWindow_Closing(object sender, CancelEventArgs e)
+        {
+            foreach (TabberItem item in Items)
+            {
+                e.Cancel = !item.CanClosing();
+                if (e.Cancel) break;
+            }
         }
         private void ContentWindow_Activated(object sender, EventArgs e)
         {
-            ZOrders.TopReorder(currentWindow);
+            ZOrders.TopReorder(this);
         }
 
         private TabPanel FindItemsPanel(DependencyObject startNode)
@@ -86,10 +106,9 @@ namespace Tabber
             return null;
         }
 
-        private void ContentWindow_Enter(ContentWindow window)
+        internal void Enter(ContentWindow window)
         {
             if (window.Equals(this)) return;
-
             mainTabberIsEmpty = (currentWindow as ContentWindow) == null && Items.Count < 1;
             if (!mainTabberIsEmpty)
             {
@@ -104,7 +123,7 @@ namespace Tabber
             }
             shadowItem = null;
         }
-        private void ContentWindow_Move(ContentWindow window)
+        internal void Move(ContentWindow window)
         {
             if (window.Equals(this)) return;
 
@@ -150,7 +169,7 @@ namespace Tabber
                 }
             }
         }
-        private void ContentWindow_Over(ContentWindow window)
+        internal void Over(ContentWindow window)
         {
             if (window.Equals(this)) return;
 
@@ -164,6 +183,7 @@ namespace Tabber
                     TabberItem replacedItem = window.ReplaceItem();
                     Items.Add(replacedItem);
                     replacedItem.IsSelected = true;
+                    currentWindow.Activate();
                 }
             }
             else
@@ -176,10 +196,10 @@ namespace Tabber
                     TabberItem replacedItem = window.ReplaceItem();
                     Items.Insert(dropItemIndex, replacedItem);
                     replacedItem.IsSelected = true;
+                    currentWindow.Activate();
                 }
             }
         }
-
         private void FakeTab(ContentWindow window)
         {
             TabItem replaceItem = null;
@@ -262,11 +282,39 @@ namespace Tabber
         private void FocusOrderWindow(ContentWindow window)
         {
             ZOrders.OrderFound();
-            Debug.WriteLine("FocusOrderWindow:"+ currentWindow.GetHashCode());
-            if (!ZOrders.IsBackOfFront(window, currentWindow))
+            if (!ZOrders.IsBackOfFront(window.GetTabberControl(), this))
             {
-                currentWindow.Focus();
-                window.Focus();
+                ZOrders.ActiveReorder(window.GetTabberControl(), this);
+                currentWindow.Topmost = true;
+                currentWindow.Topmost = false;
+                window.Topmost = true;
+                window.Topmost = false;
+            }
+        }
+
+        internal void SortPins()
+        {
+            if (firstSort) return; 
+
+            TabberItem selectedItem = (TabberItem)SelectedItem;
+            for (int i = 1; i <= Items.Count; i++)
+                for (int j = 0; j < Items.Count - i; j++)
+                {
+                    if (!(Items[j] as TabberItem).Pin &&
+                        (Items[j + 1] as TabberItem).Pin)
+                    {
+                        object nextTemp = Items[j + 1];
+                        Items.Remove(nextTemp);
+                        Items.Insert(j, nextTemp);
+                    }
+                }
+            if(selectedItem == null && Items.Count > 0)
+            {
+                (Items[0] as TabberItem).IsSelected = true;
+            }
+            else if(Items.Count > 0)
+            {
+                selectedItem.IsSelected = true;
             }
         }
     }

@@ -9,6 +9,9 @@ using System.Windows.Input;
 
 namespace Tabber
 {
+    /// <summary>
+    /// Drag tab item shadow
+    /// </summary>
     public class ShadowTabberItem : TabItem
     {
         public ShadowTabberItem()

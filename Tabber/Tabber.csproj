@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\Tabber.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,6 +29,15 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>tabber_icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>Tabber.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="PresentationCore" />
@@ -44,14 +54,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ContentWindow.cs" />
+    <Compile Include="Enum.cs" />
     <Compile Include="TabberControl.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShadowTabberItem.cs" />
     <Compile Include="TabberItem.cs" />
-    <Compile Include="Win32\POINT.cs" />
-    <Compile Include="Win32\Win32Helper.cs" />
-    <Compile Include="Win32\WindowCmd.cs" />
     <Compile Include="ZOrderList.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="tabber_icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Tabber.pfx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

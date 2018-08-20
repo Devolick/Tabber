@@ -10,31 +10,24 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Tabber.Win32;
 
 namespace Tabber
 {
     internal sealed class ContentWindow : System.Windows.Window
     {
         private static event Action<ContentWindow> Check;
-        internal static event Action<ContentWindow> Enter;
-        internal static event Action<ContentWindow> Move;
-        internal static event Action<ContentWindow> Over;
 
         private TabberControl tabberControl;
         private bool firstDrag;
         private bool inDrag;
         private Brush background;
+        private Rect iniRect;
 
-
-        private ContentWindow()
+        public ContentWindow() { }
+        internal ContentWindow(TabberItem item, Rect rect, bool firstDrag = false)
         {
             inDrag = false;
-            Check += ContentWindow_Check;
-        }
-        internal ContentWindow(TabberItem item, Rect rect, bool firstDrag=false)
-            :this()
-        {
+            iniRect = rect;
             this.firstDrag = firstDrag;
             (item.Parent as TabberControl).Items.Remove(item);
             tabberControl = new TabberControl();
@@ -46,14 +39,20 @@ namespace Tabber
                 AllowsTransparency = true;
                 background = Background;
                 Background = Brushes.Transparent;
+                Top = rect.Y;
             }
-            Top = rect.Y;
+            else
+            {              
+                Top = rect.Y - SystemParameters.WindowCaptionHeight;
+                Top = Top < 0 ? 0 : Top;
+            }
             Left = rect.X;
             Width = rect.Width;
             Height = rect.Height;
+
+            Check += ContentWindow_Check;
             Closed += ContentWindow_Closed;
             LocationChanged += ContentWindow_LocationChanged;
-
         }
 
         private void ContentWindow_Closed(object sender, EventArgs e)
@@ -64,10 +63,12 @@ namespace Tabber
         {
             if (inDrag)
             {
-                Move?.Invoke(this);
+                foreach (TabberControl tabberControl in TabberControl.ZOrders)
+                {
+                    tabberControl.Move(this);
+                }
             }
         }
-
         private void ContentWindow_Check(ContentWindow window)
         {
             if (window.Equals(this)) return;
@@ -102,11 +103,17 @@ namespace Tabber
                 Check?.Invoke(this);
             }
             inDrag = true;
-            Enter?.Invoke(this);
+            foreach (TabberControl tabberControl in TabberControl.ZOrders)
+            {
+                tabberControl.Enter(this);
+            }
         }
         private void DragEnd()
         {
-            Over?.Invoke(this);
+            foreach (TabberControl tabberControl in TabberControl.ZOrders)
+            {
+                tabberControl.Over(this);
+            }
             inDrag = false;
             if (firstDrag)
             {

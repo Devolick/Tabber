@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>Dzmitry Dym</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://raw.githubusercontent.com/Devolick/Tabber/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/Devolick/Tabber/wiki</projectUrl>
+    <iconUrl>https://github.com/Devolick/Tabber/tree/master/Tabber/tabber_icon.ico</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>Stable version for custom windows.</releaseNotes>
+    <copyright>$copyright$</copyright>
+    <tags>TabControl, Tab, Tearable, WPF, Docking</tags>
+  </metadata>
+</package>
