@@ -95,6 +95,7 @@ namespace Tabber
 
                             DragPressed?.Invoke(this, new EventArgs());
                             Point dragPosition = this.PointToScreen(innerMousePosition);
+                            Pin = false;
                             window = new ContentWindow(
                                 this,
                                 new Rect(
