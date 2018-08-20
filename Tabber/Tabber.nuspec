@@ -8,7 +8,7 @@
     <owners>$author$</owners>
     <licenseUrl>https://raw.githubusercontent.com/Devolick/Tabber/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/Devolick/Tabber/wiki</projectUrl>
-    <iconUrl>https://github.com/Devolick/Tabber/tree/master/Tabber/tabber_icon.ico</iconUrl>
+    <iconUrl>https://raw.githubusercontent.com/Devolick/Tabber/master/Tabber/tabber_icon.ico</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <releaseNotes>Stable version for custom windows.</releaseNotes>
