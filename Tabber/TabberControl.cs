@@ -206,7 +206,8 @@ namespace Tabber
             foreach (TabItem tab in Items)
             {
                 Rect tabRect = TabItemRect(tab);
-                if (tabRect.Contains(window.GetDragPosition()))
+                TabberItem tabItem = tab as TabberItem;
+                if (tabRect.Contains(window.GetDragPosition()) && (tabItem != null && !tabItem.Pin))
                 {
                     replaceItem = tab;
                     break;
