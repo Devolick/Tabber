@@ -159,7 +159,6 @@ namespace Tabber
                 if (ItemsPanelRect()
                         .Contains(window.GetDragPosition()))
                 {
-                    Debug.WriteLine(window.GetHashCode());
                     FocusOrderWindow(window);
                     FakeTab(window.GetDragPosition());
                 }
@@ -222,7 +221,6 @@ namespace Tabber
             }
             if (replaceItem != null)
             {
-                Debug.WriteLine("1");
                 TabberItem tabberItem = replaceItem as TabberItem;
                 if (tabberItem != null && !tabberItem.Pin && (oldReplaceItem ==null || !oldReplaceItem.Equals(replaceItem))) {
                     oldReplaceItem = replaceItem;
@@ -249,7 +247,6 @@ namespace Tabber
             }
             else if((Items[Items.Count - 1] as ShadowTabberItem) == null)
             {
-                Debug.WriteLine("2");
                 if (shadowItem == null)
                 {
                     shadowItem = new ShadowTabberItem();

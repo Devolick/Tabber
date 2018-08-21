@@ -82,57 +82,112 @@ namespace Tabber
 
                     if(moveEnter)
                     {
-                        #region Drag Section
-                        if (((innerMousePosition.Y <= 0 || innerMousePosition.Y >= ActualHeight) &&
-                            (innerMousePosition.X > 0 && innerMousePosition.X < ActualWidth)) ||
-                            (tabberControl.Items[0].Equals(this) && innerMousePosition.X <= 0) ||
-                            (tabberControl.Items[tabberControl.Items.Count - 1].Equals(this) && innerMousePosition.X >= ActualWidth))
+                        if(tabberControl.TabStripPlacement == Dock.Top || tabberControl.TabStripPlacement == Dock.Bottom)
                         {
-                            if (IsMouseCaptured)
+                            #region Drag Section
+                            if (((innerMousePosition.Y <= 0 || innerMousePosition.Y >= ActualHeight) &&
+                                (innerMousePosition.X > 0 && innerMousePosition.X < ActualWidth)) ||
+                                (tabberControl.Items[0].Equals(this) && innerMousePosition.X <= 0) ||
+                                (tabberControl.Items[tabberControl.Items.Count - 1].Equals(this) && innerMousePosition.X >= ActualWidth))
                             {
-                                Mouse.Capture(null);
-                            }
+                                if (IsMouseCaptured)
+                                {
+                                    Mouse.Capture(null);
+                                }
 
-                            DragPressed?.Invoke(this, new EventArgs());
-                            Point dragPosition = this.PointToScreen(innerMousePosition);
-                            Pin = false;
-                            window = new ContentWindow(
-                                this,
-                                new Rect(
-                                    dragPosition.X + (-ActualWidth / 2),
-                                    dragPosition.Y + (-ActualHeight / 2),
-                                    currentWindow.ActualWidth,
-                                    currentWindow.ActualHeight),
-                                true);
-                            Debug.WriteLine(window.GetHashCode());
-                            dragTabAndWindow = false;
-                            inDragMove = true;
-                            window.DragMove();
-                            DragReleased?.Invoke(this, new EventArgs());
-                        }
-                        #endregion
-                        #region Swap Section
-                        else if (!tabberControl.Items[0].Equals(this) && innerMousePosition.X <= 0)
-                        {
-                            int index = tabberControl.Items.IndexOf(this);
-                            TabberItem swapItem = (TabberItem)tabberControl.Items[index - 1];
-                            if (swapItem.Pin == Pin)
-                            {
-                                tabberControl.Items.Remove(swapItem);
-                                tabberControl.Items.Insert(index, swapItem);
+                                DragPressed?.Invoke(this, new EventArgs());
+                                Point dragPosition = this.PointToScreen(innerMousePosition);
+                                Pin = false;
+                                window = new ContentWindow(
+                                    this,
+                                    new Rect(
+                                        dragPosition.X + (-ActualWidth / 2),
+                                        dragPosition.Y + (-ActualHeight / 2),
+                                        currentWindow.ActualWidth,
+                                        currentWindow.ActualHeight),
+                                    true);
+                                dragTabAndWindow = false;
+                                inDragMove = true;
+                                window.DragMove();
+                                DragReleased?.Invoke(this, new EventArgs());
                             }
-                        }
-                        else if (!tabberControl.Items[tabberControl.Items.Count - 1].Equals(this) && innerMousePosition.X >= ActualWidth)
-                        {
-                            int index = tabberControl.Items.IndexOf(this);
-                            TabberItem swapItem = (TabberItem)tabberControl.Items[index + 1];
-                            if (swapItem.Pin == Pin)
+                            #endregion
+                            #region Swap Section
+                            else if (!tabberControl.Items[0].Equals(this) && innerMousePosition.X <= 0)
                             {
-                                tabberControl.Items.Remove(swapItem);
-                                tabberControl.Items.Insert(index, swapItem);
+                                int index = tabberControl.Items.IndexOf(this);
+                                TabberItem swapItem = (TabberItem)tabberControl.Items[index - 1];
+                                if (swapItem.Pin == Pin)
+                                {
+                                    tabberControl.Items.Remove(swapItem);
+                                    tabberControl.Items.Insert(index, swapItem);
+                                }
                             }
+                            else if (!tabberControl.Items[tabberControl.Items.Count - 1].Equals(this) && innerMousePosition.X >= ActualWidth)
+                            {
+                                int index = tabberControl.Items.IndexOf(this);
+                                TabberItem swapItem = (TabberItem)tabberControl.Items[index + 1];
+                                if (swapItem.Pin == Pin)
+                                {
+                                    tabberControl.Items.Remove(swapItem);
+                                    tabberControl.Items.Insert(index, swapItem);
+                                }
+                            }
+                            #endregion
                         }
-                        #endregion
+                        else
+                        {
+                            #region Drag Section
+                            if (((innerMousePosition.X <= 0 || innerMousePosition.X >= ActualWidth) &&
+                                (innerMousePosition.Y > 0 && innerMousePosition.Y < ActualHeight)) ||
+                                (tabberControl.Items[0].Equals(this) && innerMousePosition.Y <= 0) ||
+                                (tabberControl.Items[tabberControl.Items.Count - 1].Equals(this) && innerMousePosition.Y >= ActualHeight))
+                            {
+                                if (IsMouseCaptured)
+                                {
+                                    Mouse.Capture(null);
+                                }
+
+                                DragPressed?.Invoke(this, new EventArgs());
+                                Point dragPosition = this.PointToScreen(innerMousePosition);
+                                Pin = false;
+                                window = new ContentWindow(
+                                    this,
+                                    new Rect(
+                                        dragPosition.X + (-ActualWidth / 2),
+                                        dragPosition.Y + (-ActualHeight / 2),
+                                        currentWindow.ActualWidth,
+                                        currentWindow.ActualHeight),
+                                    true);
+                                dragTabAndWindow = false;
+                                inDragMove = true;
+                                window.DragMove();
+                                DragReleased?.Invoke(this, new EventArgs());
+                            }
+                            #endregion
+                            #region Swap Section
+                            else if (!tabberControl.Items[0].Equals(this) && innerMousePosition.Y <= 0)
+                            {
+                                int index = tabberControl.Items.IndexOf(this);
+                                TabberItem swapItem = (TabberItem)tabberControl.Items[index - 1];
+                                if (swapItem.Pin == Pin)
+                                {
+                                    tabberControl.Items.Remove(swapItem);
+                                    tabberControl.Items.Insert(index, swapItem);
+                                }
+                            }
+                            else if (!tabberControl.Items[tabberControl.Items.Count - 1].Equals(this) && innerMousePosition.Y >= ActualHeight)
+                            {
+                                int index = tabberControl.Items.IndexOf(this);
+                                TabberItem swapItem = (TabberItem)tabberControl.Items[index + 1];
+                                if (swapItem.Pin == Pin)
+                                {
+                                    tabberControl.Items.Remove(swapItem);
+                                    tabberControl.Items.Insert(index, swapItem);
+                                }
+                            }
+                            #endregion
+                        }
                     }
                     moveEnter = TabItemLocalRect().Contains(Mouse.GetPosition(this));
                 }
@@ -178,6 +233,7 @@ namespace Tabber
                 }
             }
         }
+
 
         private Rect TabItemLocalRect()
         {

@@ -2,12 +2,12 @@
 <package >
   <metadata>
     <id>$id$</id>
-    <version>$version$</version>
+    <version>1.0.4</version>
     <title>$title$</title>
     <authors>Dzmitry Dym</authors>
     <owners>$author$</owners>
     <licenseUrl>https://raw.githubusercontent.com/Devolick/Tabber/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/Devolick/Tabber/wiki</projectUrl>
+    <projectUrl>http://nonedevelopment.net/</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/Devolick/Tabber/master/Tabber/tabber_icon.ico</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
