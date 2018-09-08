@@ -5,19 +5,23 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPF"
         xmlns:tabber="clr-namespace:Tabber;assembly=Tabber"
-        mc:Ignorable="d"
+        mc:Ignorable="d" BorderThickness="0" Icon="tabber_icon.ico"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <tabber:TabberControl Pinned="False">
-            <tabber:TabberItem Header='TabberItem1'>
-                Test Tabber Content 1
-            </tabber:TabberItem>
-            <tabber:TabberItem Header='TabberItem2'>
-                Test Tabber Content 2
-            </tabber:TabberItem>
-            <tabber:TabberItem Header='TabberItem3'>
-                Test Tabber Content 3
-            </tabber:TabberItem>
-        </tabber:TabberControl>
-    </Grid>
+    <Border BorderThickness="0" BorderBrush="Red">
+        <Grid>
+            <tabber:TabberControl Pinned="False" TabStripPlacement="Top">
+                <tabber:TabberItem Header='TabberItem1' Closing="TabberItem_Closing"
+                                   DragPressed="TabberItem_DragPressed" DragReleased="TabberItem_DragReleased"
+                                   MouseDoubleClick="PinTabberItem_MouseDoubleClick" >
+                    Test Tabber Content 1
+                </tabber:TabberItem>
+                <tabber:TabberItem Header='TabberItem2' MouseDoubleClick="PinTabberItem_MouseDoubleClick">
+                    Test Tabber Content 2
+                </tabber:TabberItem>
+                <tabber:TabberItem Header='TabberItem3' Pin="False" MouseDoubleClick="PinTabberItem_MouseDoubleClick">
+                    Test Tabber Content 3
+                </tabber:TabberItem>
+            </tabber:TabberControl>
+        </Grid>
+    </Border>
 </Window>

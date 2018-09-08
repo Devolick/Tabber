@@ -89,6 +89,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="tabber_icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Tabber\Tabber.csproj">
       <Project>{524bb6c3-f5e7-45a0-9b5c-98d8b209c549}</Project>
       <Name>Tabber</Name>

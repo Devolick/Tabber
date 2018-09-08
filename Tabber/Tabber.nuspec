@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>$id$</id>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
     <title>$title$</title>
     <authors>Dzmitry Dym</authors>
     <owners>$author$</owners>
@@ -11,7 +11,7 @@
     <iconUrl>https://raw.githubusercontent.com/Devolick/Tabber/master/Tabber/tabber_icon.ico</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Stable version for custom windows.</releaseNotes>
+    <releaseNotes>Stable version for custom windows. TabStripPlacement code update.</releaseNotes>
     <copyright>$copyright$</copyright>
     <tags>TabControl, Tab, Tearable, WPF, Docking</tags>
   </metadata>

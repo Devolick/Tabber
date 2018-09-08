@@ -186,8 +186,7 @@ namespace Tabber
                     int dropItemIndex = Items.IndexOf(shadowItem);
                     Items.Remove(shadowItem);
                     TabberItem replacedItem = window.ReplaceItem();
-                    Items.Add(replacedItem);
-                    replacedItem.IsSelected = true;
+                    InsertTab(dropItemIndex, replacedItem);
                     currentWindow.Activate();
                 }
             }
@@ -199,8 +198,7 @@ namespace Tabber
                     int dropItemIndex = Items.IndexOf(shadowItem);
                     Items.Remove(shadowItem);
                     TabberItem replacedItem = window.ReplaceItem();
-                    Items.Insert(dropItemIndex, replacedItem);
-                    replacedItem.IsSelected = true;
+                    InsertTab(dropItemIndex, replacedItem);
                     currentWindow.Activate();
                 }
             }
@@ -301,7 +299,15 @@ namespace Tabber
                 window.Topmost = false;
             }
         }
-
+        private void InsertTab(int index, TabberItem item)
+        {
+            TabberItem newItem = new TabberItem();
+            newItem.DataContext = item.DataContext;
+            newItem.Header = item.Header;
+            newItem.Content = item.Content;
+            Items.Insert(index, newItem);
+            newItem.IsSelected = true;
+        }
         internal void SortPins()
         {
             if (firstSort) return; 

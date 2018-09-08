@@ -249,6 +249,7 @@ namespace Tabber
             Closing?.Invoke(this, cancelArgs);
             return !cancelArgs.Cancel;
         }
+        
         public void Close()
         {
             if (CanClosing())
